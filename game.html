@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электроника ИМ-02 Онлайн</title>
+    <style>
+        body { background-color: #111; color: #fff; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; user-select: none; touch-action: manipulation; }
+        .score-board { font-size: 24px; font-weight: bold; color: #ffcc00; margin-bottom: 10px; font-family: monospace; }
+        /* ЖК-Экран оригинального цвета */
+        .lcd-display { width: 300px; height: 190px; background-color: #8fa084; border: 6px solid #222; border-radius: 8px; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        .line { position: absolute; width: 60px; height: 3px; background-color: #1a2216; }
+        .l-lu { top: 60px; left: 0; transform: rotate(11deg); } .l-ld { top: 125px; left: 0; transform: rotate(11deg); }
+        .l-ru { top: 60px; right: 0; transform: rotate(-11deg); } .l-rd { top: 125px; right: 0; transform: rotate(-12deg); }
+        /* Графика Волка */
+        .wolf-render { position: absolute; top: 40px; width: 110px; height: 120px; display: none; }
+        .side-l { left: 45px; } .side-r { right: 45px; transform: scaleX(-1); }
+        .active { display: block !important; }
+        /* Яйца */
+        .egg { position: absolute; width: 12px; height: 15px; border: 2.5px solid #1a2216; border-radius: 50%; display: none; }
+        .e-lu-0 { top: 52px; left: 10px; } .e-lu-1 { top: 55px; left: 25px; } .e-lu-2 { top: 58px; left: 40px; }
+        .e-ld-0 { top: 118px; left: 10px; } .e-ld-1 { top: 121px; left: 25px; } .e-ld-2 { top: 124px; left: 40px; }
+        .e-ru-0 { top: 52px; right: 10px; } .e-ru-1 { top: 55px; right: 25px; } .e-ru-2 { top: 58px; right: 40px; }
+        .e-rd-0 { top: 118px; right: 10px; } .e-rd-1 { top: 121px; right: 25px; } .e-rd-2 { top: 124px; right: 40px; }
+        /* Игровые круглые кнопки внизу */
+        .pad-grid { width: 95%; max-width: 440px; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .pair { display: flex; justify-content: space-around; }
+        .round-clicker { width: 65px; height: 65px; border-radius: 50%; background: radial-gradient(circle, #ff4444, #b50e0e); border: 3px solid #2a0000; box-shadow: 0 5px 8px rgba(0,0,0,0.5); cursor: pointer; }
+        .round-clicker:active { transform: scale(0.95) translateY(2px); background: #8c0a0a; }
+    </style>
+</head>
+<body>
+
+    <div class="score-board">СЧЕТ: <span id="live-scr">0000</span></div>
+    
+    <div class="lcd-display">
+        <div class="line l-lu"></div><div class="line l-ld"></div><div class="line l-ru"></div><div class="line l-rd"></div>
+        <!-- Профессиональные векторные трафареты Волка в сборе -->
+        <svg class="wolf-render side-l active" id="w-lu" viewBox="0 0 100 120"><path d="M48,22 Q43,8 40,4 M55,20 Q58,6 64,5 M41,22 Q48,12 56,22" stroke="#161e13" stroke-width="3.5" fill="none"/><path d="M36,28 Q26,30 22,35 L12,37 L17,44 L30,40" stroke="#161e13" stroke-width="3.5" fill="none"/><circle cx="35" cy="22" r="2.5" fill="#161e13"/><path d="M46,38 L42,75 L32,112 L46,112 L50,82 L60,112 L74,112 L64,72 Z" stroke="#161e13" stroke-width="3.5" fill="none"/><path d="M44,70 L53,73 M45,58 L52,61 M46,47 L50,49" stroke="#161e13" stroke-width="2"/><path d="M30,40 L10,26 L4,44 L24,52 Z" stroke="#161e13" stroke-width="3.5" fill="none"/></svg>
+        <svg class="wolf-render side-l" id="w-ld" viewBox="0 0 100 120"><path d="M48,22 Q43,8 40,4 M55,20 Q58,6 64,5 M41,22 Q48,12 56,22" stroke="#161e13" stroke-width="3.5" fill="none"/><circle cx="35" cy="22" r="2.5" fill="#161e13"/><path d="M46,38 L42,75 L32,112 L46,112 L50,82 L60,112 L74,112 L64,72 Z" stroke="#161e13" stroke-width="3.5" fill="none"/><path d="M30,50 L8,60 L12,78 L32,68 Z" stroke="#161e13" stroke-width="3.5" fill="none"/></svg>
+        <svg class="wolf-render side-r" id="w-ru" viewBox="0 0 100 120"><path d="M48,22 Q43,8 40,4 M55,20 Q58,6 64,5 M41,22 Q48,12 56,22" stroke="#161e13" stroke-width="3.5" fill="none"/><path d="M36,28 Q26,30 22,35 L12,37 L17,44 L30,40" stroke="#161e13" stroke-width="3.5" fill="none"/><circle cx="35" cy="22" r="2.5" fill="#161e13"/><path d="M46,38 L42,75 L32,112 L46,112 L50,82 L60,112 L74,112 L64,72 Z" stroke="#161e13" stroke-width="3.5" fill="none"/><path d="M44,70 L53,73 M45,58 L52,61 M46,47 L50,49" stroke="#161e13" stroke-width="2"/><path d="M30,40 L10,26 L4,44 L24,52 Z" stroke="#161e13" stroke-width="3.5" fill="none"/></svg>
+        <svg class="wolf-render side-r" id="w-rd" viewBox="0 0 100 120"><path d="M48,22 Q43,8 40,4 M55,20 Q58,6 64,5 M41,22 Q48,12 56,22" stroke="#161e13" stroke-width="3.5" fill="none"/><circle cx="35" cy="22" r="2.5" fill="#161e13"/><path d="M46,38 L42,75 L32,112 L46,112 L50,82 L60,112 L74,112 L64,72 Z" stroke="#161e13" stroke-width="3.5" fill="none"/><path d="M30,50 L8,60 L12,78 L32,68 Z" stroke="#161e13" stroke-width="3.5" fill="none"/></svg>
+        
+        <!-- Сегменты катящихся яиц -->
+        <div class="egg e-lu-0" id="egg-lu-0"></div><div class="egg e-lu-1" id="egg-lu-1"></div><div class="egg e-lu-2" id="egg-lu-2"></div>
+        <div class="egg e-ld-0" id="egg-ld-0"></div><div class="egg e-ld-1" id="egg-ld-1"></div><div class="egg e-ld-2" id="egg-ld-2"></div>
+        <div class="egg e-ru-0" id="egg-ru-0"></div><div class="egg e-ru-1" id="egg-ru-1"></div><div class="egg e-ru-2" id="egg-ru-2"></div>
+        <div class="egg e-rd-0" id="egg-rd-0"></div><div class="egg e-rd-1" id="egg-rd-1"></div><div class="egg e-rd-2" id="egg-rd-2"></div>
+    </div>
+
+    <div class="pad-grid">
+        <div class="pair"><button class="round-clicker" onclick="press('lu')"></button><button class="round-clicker" onclick="press('ld')"></button></div>
+        <div class="pair"><button class="round-clicker" onclick="press('ru')"></button><button class="round-clicker" onclick="press('rd')"></button></div>
+    </div>
+
+    <!-- Загружаем файл игрового движка, который лежит в нашем же репозитории -->
+    <script src="core.js"></script>
+</body>
+</html>
